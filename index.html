@@ -27,6 +27,7 @@ textarea{width:100%;height:280px;padding:15px;border-radius:14px;border:none;out
 .footer{text-align:center;color:#94a3b8;margin-top:30px;font-size:13px}
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -64,9 +65,10 @@ textarea{width:100%;height:280px;padding:15px;border-radius:14px;border:none;out
 </div>
 
 <div class="card">
-<h2>Transcript History</h2>
-<p>Saved in this browser only.</p>
-<button class="danger" onclick="clearHistory()">Clear History</button>
+<h2>Cloud Transcript History</h2>
+<p>Saved in Supabase database.</p>
+<button class="secondary" onclick="loadCloudHistory()">Refresh History</button>
+<button class="danger" onclick="clearLocalResult()">Clear Result</button>
 <div id="historyList"></div>
 </div>
 
@@ -77,6 +79,9 @@ textarea{width:100%;height:280px;padding:15px;border-radius:14px;border:none;out
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+const SUPABASE_URL = "https://trdeudltzgrribtrltzi.supabase.co";
+const SUPABASE_KEY = "sb_publishable_twKhdAlVv_Qr4L-UnpAPcg_pucoqyCR";
+
 const fileInput = document.getElementById("fileInput");
 
 fileInput.addEventListener("change", () => {
@@ -147,8 +152,10 @@ async function generateTranscript() {
         const transcript = data.transcript || "No transcript returned.";
         result.value = transcript;
         updateStats(transcript);
-        saveHistory(file.name, transcript);
-        statusText.innerText = "Transcription completed and saved to history.";
+
+        await saveCloudHistory(file.name, transcript);
+
+        statusText.innerText = "Transcription completed and saved to cloud history.";
 
     } catch (error) {
         clearInterval(timer);
@@ -177,6 +184,7 @@ function downloadTxt() {
         document.getElementById("statusText").innerText = "No transcript to download.";
         return;
     }
+
     const blob = new Blob([text], { type: "text/plain" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -190,6 +198,7 @@ function downloadPdf() {
         document.getElementById("statusText").innerText = "No transcript to download.";
         return;
     }
+
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     const lines = pdf.splitTextToSize(text, 180);
@@ -197,69 +206,117 @@ function downloadPdf() {
     pdf.save("transcript.pdf");
 }
 
-function saveHistory(filename, transcript) {
-    let history = JSON.parse(localStorage.getItem("transcriptHistory")) || [];
-
-    history.unshift({
-        filename: filename,
-        transcript: transcript,
-        date: new Date().toLocaleString()
+async function saveCloudHistory(filename, transcript) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/transcripts`, {
+        method: "POST",
+        headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({
+            file_name: filename,
+            transcript: transcript,
+            summary: "",
+            language: "auto"
+        })
     });
 
-    history = history.slice(0, 10);
-    localStorage.setItem("transcriptHistory", JSON.stringify(history));
-    loadHistory();
-}
-
-function loadHistory() {
-    const historyList = document.getElementById("historyList");
-    const history = JSON.parse(localStorage.getItem("transcriptHistory")) || [];
-
-    historyList.innerHTML = "";
-
-    if (history.length === 0) {
-        historyList.innerHTML = "<p>No history yet.</p>";
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.log("Supabase save error:", errorText);
+        document.getElementById("statusText").innerText =
+            "Transcript completed, but cloud save failed.";
         return;
     }
 
-    history.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "history-item";
-        div.innerHTML = `
-            <strong>${item.filename}</strong>
-            <small>${item.date}</small><br><br>
-            <button onclick="openHistory(${index})">Open</button>
-            <button class="secondary" onclick="deleteHistory(${index})">Delete</button>
-        `;
-        historyList.appendChild(div);
-    });
+    loadCloudHistory();
 }
 
-function openHistory(index) {
-    const history = JSON.parse(localStorage.getItem("transcriptHistory")) || [];
-    const item = history[index];
+async function loadCloudHistory() {
+    const historyList = document.getElementById("historyList");
+    historyList.innerHTML = "<p>Loading history...</p>";
 
-    if (item) {
-        document.getElementById("result").value = item.transcript;
-        updateStats(item.transcript);
-        document.getElementById("statusText").innerText = "History opened.";
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/transcripts?select=*&order=created_at.desc&limit=10`, {
+            method: "GET",
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            historyList.innerHTML = "<p>Failed to load history.</p>";
+            return;
+        }
+
+        historyList.innerHTML = "";
+
+        if (!data.length) {
+            historyList.innerHTML = "<p>No cloud history yet.</p>";
+            return;
+        }
+
+        data.forEach((item) => {
+            const div = document.createElement("div");
+            div.className = "history-item";
+            div.innerHTML = `
+                <strong>${item.file_name || "Untitled file"}</strong>
+                <small>${new Date(item.created_at).toLocaleString()}</small><br><br>
+                <button onclick="openCloudHistory('${item.id}')">Open</button>
+                <button class="secondary" onclick="deleteCloudHistory('${item.id}')">Delete</button>
+            `;
+            historyList.appendChild(div);
+        });
+
+    } catch (error) {
+        historyList.innerHTML = "<p>Error loading history.</p>";
+    }
+}
+
+async function openCloudHistory(id) {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/transcripts?id=eq.${id}&select=*`, {
+        method: "GET",
+        headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+        }
+    });
+
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+        const transcript = data[0].transcript || "";
+        document.getElementById("result").value = transcript;
+        updateStats(transcript);
+        document.getElementById("statusText").innerText = "Cloud history opened.";
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 }
 
-function deleteHistory(index) {
-    let history = JSON.parse(localStorage.getItem("transcriptHistory")) || [];
-    history.splice(index, 1);
-    localStorage.setItem("transcriptHistory", JSON.stringify(history));
-    loadHistory();
+async function deleteCloudHistory(id) {
+    await fetch(`${SUPABASE_URL}/rest/v1/transcripts?id=eq.${id}`, {
+        method: "DELETE",
+        headers: {
+            "apikey": SUPABASE_KEY,
+            "Authorization": `Bearer ${SUPABASE_KEY}`
+        }
+    });
+
+    loadCloudHistory();
 }
 
-function clearHistory() {
-    localStorage.removeItem("transcriptHistory");
-    loadHistory();
+function clearLocalResult() {
+    document.getElementById("result").value = "";
+    updateStats("");
+    document.getElementById("statusText").innerText = "Result cleared.";
 }
 
-loadHistory();
+loadCloudHistory();
 </script>
 
 </body>
