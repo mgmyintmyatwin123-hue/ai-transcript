@@ -6,130 +6,22 @@
 <title>AI Transcript</title>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    color: white;
-    min-height: 100vh;
-}
-
-.container {
-    max-width: 900px;
-    margin: auto;
-    padding: 40px 18px;
-}
-
-.hero {
-    text-align: center;
-    margin-bottom: 35px;
-}
-
-.badge {
-    display: inline-block;
-    background: #2563eb;
-    padding: 8px 14px;
-    border-radius: 30px;
-    font-size: 13px;
-    margin-bottom: 18px;
-}
-
-h1 {
-    font-size: 42px;
-    margin-bottom: 12px;
-}
-
-p {
-    color: #cbd5e1;
-}
-
-.card {
-    background: rgba(30, 41, 59, 0.95);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 22px;
-    padding: 25px;
-    margin-bottom: 25px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-}
-
-.upload-area {
-    border: 2px dashed #475569;
-    border-radius: 18px;
-    padding: 30px;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-input[type=file] {
-    margin-top: 15px;
-}
-
-button {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 13px 22px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 15px;
-    margin: 6px;
-}
-
-button:hover {
-    background: #1d4ed8;
-}
-
-.secondary {
-    background: #334155;
-}
-
-.secondary:hover {
-    background: #475569;
-}
-
-textarea {
-    width: 100%;
-    height: 280px;
-    padding: 15px;
-    border-radius: 14px;
-    border: none;
-    outline: none;
-    margin-top: 15px;
-    font-size: 15px;
-    line-height: 1.6;
-}
-
-.status {
-    color: #93c5fd;
-    margin-top: 12px;
-    font-size: 14px;
-}
-
-.features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 15px;
-    margin-top: 25px;
-}
-
-.feature {
-    background: rgba(15, 23, 42, 0.8);
-    padding: 18px;
-    border-radius: 16px;
-    color: #cbd5e1;
-}
-
-.footer {
-    text-align: center;
-    color: #94a3b8;
-    margin-top: 30px;
-    font-size: 13px;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:linear-gradient(135deg,#0f172a,#1e293b);color:white;min-height:100vh}
+.container{max-width:900px;margin:auto;padding:40px 18px}
+.hero{text-align:center;margin-bottom:35px}
+.badge{display:inline-block;background:#2563eb;padding:8px 14px;border-radius:30px;font-size:13px;margin-bottom:18px}
+h1{font-size:42px;margin-bottom:12px}
+p{color:#cbd5e1}
+.card{background:rgba(30,41,59,.95);border-radius:22px;padding:25px;margin-bottom:25px;box-shadow:0 15px 35px rgba(0,0,0,.3)}
+.upload-area{border:2px dashed #475569;border-radius:18px;padding:30px;text-align:center;margin-bottom:20px}
+button{background:#2563eb;color:white;border:none;padding:13px 22px;border-radius:10px;cursor:pointer;font-size:15px;margin:6px}
+.secondary{background:#334155}
+textarea{width:100%;height:280px;padding:15px;border-radius:14px;border:none;outline:none;margin-top:15px;font-size:15px;line-height:1.6}
+.status,.info,.stats{color:#93c5fd;margin-top:12px;font-size:14px}
+.progress-wrap{display:none;margin-top:15px;background:#0f172a;border-radius:20px;overflow:hidden}
+.progress-bar{width:0%;background:#2563eb;padding:8px;text-align:center}
+.footer{text-align:center;color:#94a3b8;margin-top:30px;font-size:13px}
 </style>
 </head>
 
@@ -137,49 +29,63 @@ textarea {
 
 <div class="container">
 
-    <div class="hero">
-        <div class="badge">AI Powered Transcription</div>
-        <h1>AI Transcript</h1>
-        <p>Upload audio or video and convert speech into text instantly.</p>
-    </div>
+<div class="hero">
+<div class="badge">AI Powered Transcription</div>
+<h1>AI Transcript</h1>
+<p>Upload audio or video and convert speech into text instantly.</p>
+</div>
 
-    <div class="card">
-        <div class="upload-area">
-            <h3>Upload Audio / Video File</h3>
-            <p>Supports MP3, WAV, M4A, MP4</p>
-            <input type="file" id="fileInput" accept="audio/*,video/*">
-        </div>
+<div class="card">
+<div class="upload-area">
+<h3>Upload Audio / Video File</h3>
+<p>Supports MP3, WAV, M4A, MP4</p>
+<br>
+<input type="file" id="fileInput" accept="audio/*,video/*">
+<div class="info" id="fileInfo"></div>
+</div>
 
-        <button onclick="generateTranscript()">Generate Transcript</button>
-        <button class="secondary" onclick="copyTranscript()">Copy Text</button>
-        <button class="secondary" onclick="downloadTxt()">Download TXT</button>
+<button onclick="generateTranscript()">Generate Transcript</button>
+<button class="secondary" onclick="copyTranscript()">Copy Text</button>
+<button class="secondary" onclick="downloadTxt()">Download TXT</button>
+<button class="secondary" onclick="downloadPdf()">Download PDF</button>
 
-        <div class="status" id="statusText">Ready to transcribe.</div>
-    </div>
+<div class="progress-wrap" id="progressWrap">
+<div class="progress-bar" id="progressBar">0%</div>
+</div>
 
-    <div class="card">
-        <h2>Transcript Result</h2>
-        <textarea id="result" placeholder="Your transcript will appear here..."></textarea>
-    </div>
+<div class="status" id="statusText">Ready to transcribe.</div>
+<div class="stats" id="statsText">Words: 0 | Characters: 0</div>
+</div>
 
-    <div class="features">
-        <div class="feature">Fast AI Transcript</div>
-        <div class="feature">Audio & Video Support</div>
-        <div class="feature">Copy Transcript</div>
-        <div class="feature">Download TXT</div>
-    </div>
+<div class="card">
+<h2>Transcript Result</h2>
+<textarea id="result" placeholder="Your transcript will appear here..."></textarea>
+</div>
 
-    <div class="footer">
-        AI Transcript © 2026
-    </div>
+<div class="footer">AI Transcript © 2026</div>
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
+const fileInput = document.getElementById("fileInput");
+
+fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    const fileInfo = document.getElementById("fileInfo");
+
+    if (file) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        fileInfo.innerHTML = "📄 " + file.name + "<br>📦 " + sizeMB + " MB";
+    }
+});
+
 async function generateTranscript() {
-    const fileInput = document.getElementById("fileInput");
     const result = document.getElementById("result");
     const statusText = document.getElementById("statusText");
+    const progressWrap = document.getElementById("progressWrap");
+    const progressBar = document.getElementById("progressBar");
 
     if (!fileInput.files.length) {
         statusText.innerText = "Please choose an audio or video file first.";
@@ -187,13 +93,25 @@ async function generateTranscript() {
     }
 
     const file = fileInput.files[0];
-
     const formData = new FormData();
+
     formData.append("file", file);
     formData.append("model", "whisper-large-v3");
 
     result.value = "";
     statusText.innerText = "Transcribing... Please wait.";
+    progressWrap.style.display = "block";
+    progressBar.style.width = "0%";
+    progressBar.innerText = "0%";
+
+    let progress = 0;
+    const timer = setInterval(() => {
+        if (progress < 90) {
+            progress += 10;
+            progressBar.style.width = progress + "%";
+            progressBar.innerText = progress + "%";
+        }
+    }, 500);
 
     try {
         const response = await fetch("/api/transcribe", {
@@ -203,19 +121,33 @@ async function generateTranscript() {
 
         const data = await response.json();
 
+        clearInterval(timer);
+        progressBar.style.width = "100%";
+        progressBar.innerText = "100%";
+
         if (!response.ok) {
             statusText.innerText = "Transcription failed.";
             result.value = "Error: " + (data.error || "Unknown error");
             return;
         }
 
-        result.value = data.transcript || "No transcript returned.";
+        const transcript = data.transcript || "No transcript returned.";
+        result.value = transcript;
+        updateStats(transcript);
         statusText.innerText = "Transcription completed successfully.";
 
     } catch (error) {
+        clearInterval(timer);
         statusText.innerText = "Error occurred.";
         result.value = "Error: " + error.message;
     }
+}
+
+function updateStats(text) {
+    const cleanText = text.trim();
+    const words = cleanText ? cleanText.split(/\s+/).length : 0;
+    document.getElementById("statsText").innerText =
+        "Words: " + words + " | Characters: " + text.length;
 }
 
 function copyTranscript() {
@@ -238,8 +170,22 @@ function downloadTxt() {
     link.href = URL.createObjectURL(blob);
     link.download = "transcript.txt";
     link.click();
+}
 
-    document.getElementById("statusText").innerText = "TXT downloaded.";
+function downloadPdf() {
+    const text = document.getElementById("result").value;
+
+    if (!text.trim()) {
+        document.getElementById("statusText").innerText = "No transcript to download.";
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const lines = pdf.splitTextToSize(text, 180);
+
+    pdf.text(lines, 10, 15);
+    pdf.save("transcript.pdf");
 }
 </script>
 
