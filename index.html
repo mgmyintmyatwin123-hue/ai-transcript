@@ -8,7 +8,7 @@
 <h1>AI Transcript</h1>
 <p>Convert Audio & Video into Text instantly</p>
 
-<input type="file" id="fileInput">
+<input type="file" id="fileInput" accept="audio/*,video/*">
 <br><br>
 
 <button onclick="generateTranscript()">Generate Transcript</button>
@@ -19,15 +19,40 @@
 
 <script>
 async function generateTranscript() {
+    const fileInput = document.getElementById("fileInput");
     const result = document.getElementById("result");
-    result.value = "Connecting to API...";
 
-    const response = await fetch("/api/transcribe", {
-        method: "POST"
-    });
+    if (!fileInput.files.length) {
+        result.value = "Please choose an audio or video file first.";
+        return;
+    }
 
-    const data = await response.json();
-    result.value = JSON.stringify(data, null, 2);
+    const file = fileInput.files[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("model", "whisper-large-v3");
+
+    result.value = "Transcribing... Please wait.";
+
+    try {
+        const response = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            result.value = "Error: " + (data.error || "Transcription failed");
+            return;
+        }
+
+        result.value = data.transcript || "No transcript returned.";
+
+    } catch (error) {
+        result.value = "Error: " + error.message;
+    }
 }
 </script>
 
