@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Transcript</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:linear-gradient(135deg,#0f172a,#1e293b);color:white;min-height:100vh}
@@ -17,14 +16,17 @@ p{color:#cbd5e1}
 .upload-area{border:2px dashed #475569;border-radius:18px;padding:30px;text-align:center;margin-bottom:20px}
 button{background:#2563eb;color:white;border:none;padding:13px 22px;border-radius:10px;cursor:pointer;font-size:15px;margin:6px}
 .secondary{background:#334155}
+.danger{background:#dc2626}
 textarea{width:100%;height:280px;padding:15px;border-radius:14px;border:none;outline:none;margin-top:15px;font-size:15px;line-height:1.6}
 .status,.info,.stats{color:#93c5fd;margin-top:12px;font-size:14px}
 .progress-wrap{display:none;margin-top:15px;background:#0f172a;border-radius:20px;overflow:hidden}
 .progress-bar{width:0%;background:#2563eb;padding:8px;text-align:center}
+.history-item{background:#0f172a;padding:15px;border-radius:14px;margin-top:12px}
+.history-item strong{display:block;margin-bottom:8px}
+.history-item small{color:#94a3b8}
 .footer{text-align:center;color:#94a3b8;margin-top:30px;font-size:13px}
 </style>
 </head>
-
 <body>
 
 <div class="container">
@@ -38,8 +40,7 @@ textarea{width:100%;height:280px;padding:15px;border-radius:14px;border:none;out
 <div class="card">
 <div class="upload-area">
 <h3>Upload Audio / Video File</h3>
-<p>Supports MP3, WAV, M4A, MP4</p>
-<br>
+<p>Supports MP3, WAV, M4A, MP4</p><br>
 <input type="file" id="fileInput" accept="audio/*,video/*">
 <div class="info" id="fileInfo"></div>
 </div>
@@ -60,6 +61,13 @@ textarea{width:100%;height:280px;padding:15px;border-radius:14px;border:none;out
 <div class="card">
 <h2>Transcript Result</h2>
 <textarea id="result" placeholder="Your transcript will appear here..."></textarea>
+</div>
+
+<div class="card">
+<h2>Transcript History</h2>
+<p>Saved in this browser only.</p>
+<button class="danger" onclick="clearHistory()">Clear History</button>
+<div id="historyList"></div>
 </div>
 
 <div class="footer">AI Transcript © 2026</div>
@@ -93,8 +101,13 @@ async function generateTranscript() {
     }
 
     const file = fileInput.files[0];
-    const formData = new FormData();
 
+    if (file.size > 25 * 1024 * 1024) {
+        statusText.innerText = "File is too large. Maximum size is 25MB.";
+        return;
+    }
+
+    const formData = new FormData();
     formData.append("file", file);
     formData.append("model", "whisper-large-v3");
 
@@ -134,7 +147,8 @@ async function generateTranscript() {
         const transcript = data.transcript || "No transcript returned.";
         result.value = transcript;
         updateStats(transcript);
-        statusText.innerText = "Transcription completed successfully.";
+        saveHistory(file.name, transcript);
+        statusText.innerText = "Transcription completed and saved to history.";
 
     } catch (error) {
         clearInterval(timer);
@@ -159,12 +173,10 @@ function copyTranscript() {
 
 function downloadTxt() {
     const text = document.getElementById("result").value;
-
     if (!text.trim()) {
         document.getElementById("statusText").innerText = "No transcript to download.";
         return;
     }
-
     const blob = new Blob([text], { type: "text/plain" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -174,19 +186,80 @@ function downloadTxt() {
 
 function downloadPdf() {
     const text = document.getElementById("result").value;
-
     if (!text.trim()) {
         document.getElementById("statusText").innerText = "No transcript to download.";
         return;
     }
-
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF();
     const lines = pdf.splitTextToSize(text, 180);
-
     pdf.text(lines, 10, 15);
     pdf.save("transcript.pdf");
 }
+
+function saveHistory(filename, transcript) {
+    let history = JSON.parse(localStorage.getItem("transcriptHistory")) || [];
+
+    history.unshift({
+        filename: filename,
+        transcript: transcript,
+        date: new Date().toLocaleString()
+    });
+
+    history = history.slice(0, 10);
+    localStorage.setItem("transcriptHistory", JSON.stringify(history));
+    loadHistory();
+}
+
+function loadHistory() {
+    const historyList = document.getElementById("historyList");
+    const history = JSON.parse(localStorage.getItem("transcriptHistory")) || [];
+
+    historyList.innerHTML = "";
+
+    if (history.length === 0) {
+        historyList.innerHTML = "<p>No history yet.</p>";
+        return;
+    }
+
+    history.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.innerHTML = `
+            <strong>${item.filename}</strong>
+            <small>${item.date}</small><br><br>
+            <button onclick="openHistory(${index})">Open</button>
+            <button class="secondary" onclick="deleteHistory(${index})">Delete</button>
+        `;
+        historyList.appendChild(div);
+    });
+}
+
+function openHistory(index) {
+    const history = JSON.parse(localStorage.getItem("transcriptHistory")) || [];
+    const item = history[index];
+
+    if (item) {
+        document.getElementById("result").value = item.transcript;
+        updateStats(item.transcript);
+        document.getElementById("statusText").innerText = "History opened.";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+}
+
+function deleteHistory(index) {
+    let history = JSON.parse(localStorage.getItem("transcriptHistory")) || [];
+    history.splice(index, 1);
+    localStorage.setItem("transcriptHistory", JSON.stringify(history));
+    loadHistory();
+}
+
+function clearHistory() {
+    localStorage.removeItem("transcriptHistory");
+    loadHistory();
+}
+
+loadHistory();
 </script>
 
 </body>
