@@ -1,323 +1,499 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Transcript</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
-body{background:linear-gradient(135deg,#0f172a,#1e293b);color:white;min-height:100vh}
-.container{max-width:900px;margin:auto;padding:40px 18px}
-.hero{text-align:center;margin-bottom:35px}
-.badge{display:inline-block;background:#2563eb;padding:8px 14px;border-radius:30px;font-size:13px;margin-bottom:18px}
-h1{font-size:42px;margin-bottom:12px}
-p{color:#cbd5e1}
-.card{background:rgba(30,41,59,.95);border-radius:22px;padding:25px;margin-bottom:25px;box-shadow:0 15px 35px rgba(0,0,0,.3)}
-.upload-area{border:2px dashed #475569;border-radius:18px;padding:30px;text-align:center;margin-bottom:20px}
-button{background:#2563eb;color:white;border:none;padding:13px 22px;border-radius:10px;cursor:pointer;font-size:15px;margin:6px}
-.secondary{background:#334155}
-.danger{background:#dc2626}
-textarea{width:100%;height:280px;padding:15px;border-radius:14px;border:none;outline:none;margin-top:15px;font-size:15px;line-height:1.6}
-.status,.info,.stats{color:#93c5fd;margin-top:12px;font-size:14px}
-.progress-wrap{display:none;margin-top:15px;background:#0f172a;border-radius:20px;overflow:hidden}
-.progress-bar{width:0%;background:#2563eb;padding:8px;text-align:center}
-.history-item{background:#0f172a;padding:15px;border-radius:14px;margin-top:12px}
-.history-item strong{display:block;margin-bottom:8px}
-.history-item small{color:#94a3b8}
-.footer{text-align:center;color:#94a3b8;margin-top:30px;font-size:13px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transcript Master - AI Transcript Tool</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Inter, Arial, sans-serif;
+    }
+
+    body {
+      background: #f7f9fc;
+      color: #172033;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 18px 7%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: #2563eb;
+    }
+
+    nav a {
+      margin-left: 22px;
+      text-decoration: none;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .hero {
+      padding: 70px 7%;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 35px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: #0f172a;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #64748b;
+      margin-bottom: 28px;
+      line-height: 1.7;
+    }
+
+    .btn {
+      border: none;
+      background: #2563eb;
+      color: white;
+      padding: 14px 22px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      margin: 5px;
+    }
+
+    .btn.secondary {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .card {
+      background: white;
+      border-radius: 22px;
+      padding: 26px;
+      box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+    }
+
+    .section {
+      padding: 40px 7%;
+    }
+
+    .section h2 {
+      font-size: 32px;
+      margin-bottom: 22px;
+      color: #0f172a;
+    }
+
+    .tools {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .tool-card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+      transition: 0.25s;
+    }
+
+    .tool-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .tool-card h3 {
+      margin: 12px 0;
+      color: #0f172a;
+    }
+
+    .tool-card p {
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    .upload-box {
+      border: 2px dashed #93c5fd;
+      padding: 35px;
+      text-align: center;
+      border-radius: 18px;
+      background: #f8fbff;
+      margin-bottom: 18px;
+    }
+
+    input[type="file"] {
+      margin-top: 18px;
+    }
+
+    .progress-wrap {
+      background: #e2e8f0;
+      height: 14px;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 18px 0;
+    }
+
+    .progress {
+      width: 0%;
+      height: 100%;
+      background: #2563eb;
+      transition: 0.3s;
+    }
+
+    textarea {
+      width: 100%;
+      height: 260px;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 18px;
+      resize: vertical;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .stats {
+      margin: 14px 0;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .history-item {
+      padding: 14px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      margin-top: 10px;
+      color: #334155;
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: #64748b;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 800px) {
+      header {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      nav a {
+        margin: 8px;
+        display: inline-block;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        padding-top: 45px;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+  <header>
+    <div class="logo">Transcript Master</div>
+    <nav>
+      <a href="#tools">Tools</a>
+      <a href="#transcript">AI Transcript</a>
+      <a href="#history">History</a>
+    </nav>
+  </header>
 
-<div class="hero">
-<div class="badge">AI Powered Transcription</div>
-<h1>AI Transcript</h1>
-<p>Upload audio or video and convert speech into text instantly.</p>
-</div>
+  <section class="hero">
+    <div>
+      <h1>AI Powered Audio & Video Transcription</h1>
+      <p>
+        Upload your audio or video file and convert speech into clean text.
+        Copy, edit, download, and manage your transcript easily.
+      </p>
+      <button class="btn" onclick="scrollToTool()">Start Transcribing</button>
+      <button class="btn secondary" onclick="scrollToTools()">View Tools</button>
+    </div>
 
-<div class="card">
-<div class="upload-area">
-<h3>Upload Audio / Video File</h3>
-<p>Supports MP3, WAV, M4A, MP4</p><br>
-<input type="file" id="fileInput" accept="audio/*,video/*">
-<div class="info" id="fileInfo"></div>
-</div>
+    <div class="card">
+      <h2>Fast Transcript Tool</h2>
+      <p style="color:#64748b; line-height:1.7; margin-top:10px;">
+        MP3, WAV, M4A, and MP4 supported.  
+        Generate transcript, copy text, download TXT, and export PDF.
+      </p>
+    </div>
+  </section>
 
-<button onclick="generateTranscript()">Generate Transcript</button>
-<button class="secondary" onclick="copyTranscript()">Copy Text</button>
-<button class="secondary" onclick="downloadTxt()">Download TXT</button>
-<button class="secondary" onclick="downloadPdf()">Download PDF</button>
+  <section class="section" id="tools">
+    <h2>AI Tools</h2>
 
-<div class="progress-wrap" id="progressWrap">
-<div class="progress-bar" id="progressBar">0%</div>
-</div>
+    <div class="tools">
+      <div class="tool-card">
+        <h3>🎙 AI Transcript</h3>
+        <p>Convert audio and video into text.</p>
+      </div>
 
-<div class="status" id="statusText">Ready to transcribe.</div>
-<div class="stats" id="statsText">Words: 0 | Characters: 0</div>
-</div>
+      <div class="tool-card">
+        <h3>📄 TXT Export</h3>
+        <p>Download transcript as text file.</p>
+      </div>
 
-<div class="card">
-<h2>Transcript Result</h2>
-<textarea id="result" placeholder="Your transcript will appear here..."></textarea>
-</div>
+      <div class="tool-card">
+        <h3>🧾 PDF Export</h3>
+        <p>Save transcript as printable PDF.</p>
+      </div>
 
-<div class="card">
-<h2>Cloud Transcript History</h2>
-<p>Saved in Supabase database.</p>
-<button class="secondary" onclick="loadCloudHistory()">Refresh History</button>
-<button class="danger" onclick="clearLocalResult()">Clear Result</button>
-<div id="historyList"></div>
-</div>
+      <div class="tool-card">
+        <h3>☁ Cloud History</h3>
+        <p>Save and manage transcript history.</p>
+      </div>
+    </div>
+  </section>
 
-<div class="footer">AI Transcript © 2026</div>
+  <section class="section" id="transcript">
+    <h2>AI Transcript</h2>
 
-</div>
+    <div class="card">
+      <div class="upload-box">
+        <h3>Upload Audio / Video File</h3>
+        <p style="color:#64748b; margin-top:8px;">Supports MP3, WAV, M4A, MP4</p>
+        <input type="file" id="fileInput" accept=".mp3,.wav,.m4a,.mp4,audio/*,video/*" />
+      </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+      <button class="btn" onclick="generateTranscript()">Generate Transcript</button>
+      <button class="btn secondary" onclick="copyText()">Copy Text</button>
+      <button class="btn secondary" onclick="downloadTXT()">Download TXT</button>
+      <button class="btn secondary" onclick="downloadPDF()">Download PDF</button>
 
-<script>
-const SUPABASE_URL = "https://trdeudltzgrribtrltzi.supabase.co";
-const SUPABASE_KEY = "sb_publishable_twKhdAlVv_Qr4L-UnpAPcg_pucoqyCR";
+      <div class="progress-wrap">
+        <div class="progress" id="progressBar"></div>
+      </div>
 
-const fileInput = document.getElementById("fileInput");
+      <p id="statusText">Ready to transcribe.</p>
 
-fileInput.addEventListener("change", () => {
-    const file = fileInput.files[0];
-    const fileInfo = document.getElementById("fileInfo");
+      <div class="stats" id="statsText">
+        Words: 0 | Characters: 0
+      </div>
 
-    if (file) {
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        fileInfo.innerHTML = "📄 " + file.name + "<br>📦 " + sizeMB + " MB";
-    }
-});
+      <textarea id="resultText" placeholder="Transcript result will appear here..."></textarea>
+    </div>
+  </section>
 
-async function generateTranscript() {
-    const result = document.getElementById("result");
-    const statusText = document.getElementById("statusText");
-    const progressWrap = document.getElementById("progressWrap");
+  <section class="section" id="history">
+    <h2>Cloud Transcript History</h2>
+
+    <div class="card">
+      <p style="color:#64748b;">Saved transcript history will appear here.</p>
+      <button class="btn" onclick="saveHistory()">Save Current Result</button>
+      <button class="btn secondary" onclick="refreshHistory()">Refresh History</button>
+      <button class="btn secondary" onclick="clearResult()">Clear Result</button>
+
+      <div id="historyList"></div>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 Transcript Master. All rights reserved.
+  </footer>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const resultText = document.getElementById("resultText");
     const progressBar = document.getElementById("progressBar");
-
-    if (!fileInput.files.length) {
-        statusText.innerText = "Please choose an audio or video file first.";
-        return;
-    }
-
-    const file = fileInput.files[0];
-
-    if (file.size > 25 * 1024 * 1024) {
-        statusText.innerText = "File is too large. Maximum size is 25MB.";
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("model", "whisper-large-v3");
-
-    result.value = "";
-    statusText.innerText = "Transcribing... Please wait.";
-    progressWrap.style.display = "block";
-    progressBar.style.width = "0%";
-    progressBar.innerText = "0%";
-
-    let progress = 0;
-    const timer = setInterval(() => {
-        if (progress < 90) {
-            progress += 10;
-            progressBar.style.width = progress + "%";
-            progressBar.innerText = progress + "%";
-        }
-    }, 500);
-
-    try {
-        const response = await fetch("/api/transcribe", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await response.json();
-
-        clearInterval(timer);
-        progressBar.style.width = "100%";
-        progressBar.innerText = "100%";
-
-        if (!response.ok) {
-            statusText.innerText = "Transcription failed.";
-            result.value = "Error: " + (data.error || "Unknown error");
-            return;
-        }
-
-        const transcript = data.transcript || "No transcript returned.";
-        result.value = transcript;
-        updateStats(transcript);
-
-        await saveCloudHistory(file.name, transcript);
-
-        statusText.innerText = "Transcription completed and saved to cloud history.";
-
-    } catch (error) {
-        clearInterval(timer);
-        statusText.innerText = "Error occurred.";
-        result.value = "Error: " + error.message;
-    }
-}
-
-function updateStats(text) {
-    const cleanText = text.trim();
-    const words = cleanText ? cleanText.split(/\s+/).length : 0;
-    document.getElementById("statsText").innerText =
-        "Words: " + words + " | Characters: " + text.length;
-}
-
-function copyTranscript() {
-    const result = document.getElementById("result");
-    result.select();
-    document.execCommand("copy");
-    document.getElementById("statusText").innerText = "Transcript copied.";
-}
-
-function downloadTxt() {
-    const text = document.getElementById("result").value;
-    if (!text.trim()) {
-        document.getElementById("statusText").innerText = "No transcript to download.";
-        return;
-    }
-
-    const blob = new Blob([text], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "transcript.txt";
-    link.click();
-}
-
-function downloadPdf() {
-    const text = document.getElementById("result").value;
-    if (!text.trim()) {
-        document.getElementById("statusText").innerText = "No transcript to download.";
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    const lines = pdf.splitTextToSize(text, 180);
-    pdf.text(lines, 10, 15);
-    pdf.save("transcript.pdf");
-}
-
-async function saveCloudHistory(filename, transcript) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/transcripts`, {
-        method: "POST",
-        headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
-        },
-        body: JSON.stringify({
-            file_name: filename,
-            transcript: transcript,
-            summary: "",
-            language: "auto"
-        })
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.log("Supabase save error:", errorText);
-        document.getElementById("statusText").innerText =
-            "Transcript completed, but cloud save failed.";
-        return;
-    }
-
-    loadCloudHistory();
-}
-
-async function loadCloudHistory() {
+    const statusText = document.getElementById("statusText");
+    const statsText = document.getElementById("statsText");
     const historyList = document.getElementById("historyList");
-    historyList.innerHTML = "<p>Loading history...</p>";
 
-    try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/transcripts?select=*&order=created_at.desc&limit=10`, {
-            method: "GET",
-            headers: {
-                "apikey": SUPABASE_KEY,
-                "Authorization": `Bearer ${SUPABASE_KEY}`
-            }
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            historyList.innerHTML = "<p>Failed to load history.</p>";
-            return;
-        }
-
-        historyList.innerHTML = "";
-
-        if (!data.length) {
-            historyList.innerHTML = "<p>No cloud history yet.</p>";
-            return;
-        }
-
-        data.forEach((item) => {
-            const div = document.createElement("div");
-            div.className = "history-item";
-            div.innerHTML = `
-                <strong>${item.file_name || "Untitled file"}</strong>
-                <small>${new Date(item.created_at).toLocaleString()}</small><br><br>
-                <button onclick="openCloudHistory('${item.id}')">Open</button>
-                <button class="secondary" onclick="deleteCloudHistory('${item.id}')">Delete</button>
-            `;
-            historyList.appendChild(div);
-        });
-
-    } catch (error) {
-        historyList.innerHTML = "<p>Error loading history.</p>";
+    function scrollToTool() {
+      document.getElementById("transcript").scrollIntoView({ behavior: "smooth" });
     }
-}
 
-async function openCloudHistory(id) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/transcripts?id=eq.${id}&select=*`, {
-        method: "GET",
-        headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
-        }
-    });
-
-    const data = await response.json();
-
-    if (data && data.length > 0) {
-        const transcript = data[0].transcript || "";
-        document.getElementById("result").value = transcript;
-        updateStats(transcript);
-        document.getElementById("statusText").innerText = "Cloud history opened.";
-        window.scrollTo({ top: 0, behavior: "smooth" });
+    function scrollToTools() {
+      document.getElementById("tools").scrollIntoView({ behavior: "smooth" });
     }
-}
 
-async function deleteCloudHistory(id) {
-    await fetch(`${SUPABASE_URL}/rest/v1/transcripts?id=eq.${id}`, {
-        method: "DELETE",
-        headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
+    function updateStats() {
+      const text = resultText.value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      const chars = text.length;
+      statsText.textContent = `Words: ${words} | Characters: ${chars}`;
+    }
+
+    resultText.addEventListener("input", updateStats);
+
+    function generateTranscript() {
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Please upload an audio or video file first.");
+        return;
+      }
+
+      const allowedTypes = ["audio", "video"];
+      const fileType = file.type.split("/")[0];
+
+      if (!allowedTypes.includes(fileType)) {
+        alert("Invalid file type. Please upload MP3, WAV, M4A, or MP4.");
+        return;
+      }
+
+      statusText.textContent = "Uploading and generating transcript...";
+      progressBar.style.width = "0%";
+
+      let progress = 0;
+
+      const fakeProgress = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = progress + "%";
+
+        if (progress >= 100) {
+          clearInterval(fakeProgress);
+
+          resultText.value =
+            "Demo transcript generated successfully.\n\n" +
+            "Your uploaded file: " + file.name + "\n\n" +
+            "Connect your real AI transcription API in generateTranscript() function to generate real transcript output.";
+
+          statusText.textContent = "Transcript generated.";
+          updateStats();
         }
-    });
+      }, 180);
+    }
 
-    loadCloudHistory();
-}
+    function copyText() {
+      if (!resultText.value.trim()) {
+        alert("No transcript to copy.");
+        return;
+      }
 
-function clearLocalResult() {
-    document.getElementById("result").value = "";
-    updateStats("");
-    document.getElementById("statusText").innerText = "Result cleared.";
-}
+      navigator.clipboard.writeText(resultText.value);
+      alert("Transcript copied.");
+    }
 
-loadCloudHistory();
-</script>
+    function downloadTXT() {
+      if (!resultText.value.trim()) {
+        alert("No transcript to download.");
+        return;
+      }
+
+      const blob = new Blob([resultText.value], { type: "text/plain" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "transcript-master.txt";
+      link.click();
+    }
+
+    function downloadPDF() {
+      if (!resultText.value.trim()) {
+        alert("No transcript to download.");
+        return;
+      }
+
+      const printWindow = window.open("", "_blank");
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Transcript Master PDF</title>
+            <style>
+              body { font-family: Arial; padding: 35px; line-height: 1.7; }
+              h1 { color: #2563eb; }
+              pre { white-space: pre-wrap; font-size: 14px; }
+            </style>
+          </head>
+          <body>
+            <h1>Transcript Master</h1>
+            <pre>${resultText.value.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre>
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+    function saveHistory() {
+      const text = resultText.value.trim();
+
+      if (!text) {
+        alert("No transcript to save.");
+        return;
+      }
+
+      const histories = JSON.parse(localStorage.getItem("transcriptHistory") || "[]");
+
+      histories.unshift({
+        text: text,
+        date: new Date().toLocaleString()
+      });
+
+      localStorage.setItem("transcriptHistory", JSON.stringify(histories));
+      refreshHistory();
+      alert("Transcript saved.");
+    }
+
+    function refreshHistory() {
+      const histories = JSON.parse(localStorage.getItem("transcriptHistory") || "[]");
+
+      historyList.innerHTML = "";
+
+      if (histories.length === 0) {
+        historyList.innerHTML = '<div class="history-item">No history found.</div>';
+        return;
+      }
+
+      histories.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "history-item";
+        div.innerHTML = `
+          <strong>${item.date}</strong><br>
+          ${item.text.substring(0, 180)}...
+          <br><br>
+          <button class="btn secondary" onclick="loadHistory(${index})">Open</button>
+          <button class="btn secondary" onclick="deleteHistory(${index})">Delete</button>
+        `;
+        historyList.appendChild(div);
+      });
+    }
+
+    function loadHistory(index) {
+      const histories = JSON.parse(localStorage.getItem("transcriptHistory") || "[]");
+      resultText.value = histories[index].text;
+      updateStats();
+      scrollToTool();
+    }
+
+    function deleteHistory(index) {
+      const histories = JSON.parse(localStorage.getItem("transcriptHistory") || "[]");
+      histories.splice(index, 1);
+      localStorage.setItem("transcriptHistory", JSON.stringify(histories));
+      refreshHistory();
+    }
+
+    function clearResult() {
+      resultText.value = "";
+      progressBar.style.width = "0%";
+      statusText.textContent = "Ready to transcribe.";
+      updateStats();
+    }
+
+    refreshHistory();
+  </script>
 
 </body>
 </html>
